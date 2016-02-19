@@ -6,9 +6,10 @@
 ## Installation
 Use the package manager to install the library for your architecture.
 
-### Test communication with the module - are all posible radio functions 
-
-Test is for PIC32 MCUs.
+### Test communication with the module
+All posible radio functions for LoRa RF click board are listed in this example.
+Test is for PIC32 MCUs, other platforms will have differences in system_init function
+and UART interrupt routine.
 ```
 #include "lora_rf.h"
 
