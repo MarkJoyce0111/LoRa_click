@@ -1,0 +1,67 @@
+[DEVICE]
+Name=FT900
+Clock=100000000
+[MEMORY_MODEL]
+Value=0
+[BUILD_TYPE]
+Value=1
+[ACTIVE_TAB]
+Value=ft90x.c
+[USE_EEPROM]
+Value=0
+[USE_HEAP]
+Value=0
+[HEAP_SIZE]
+Value=2000
+[EEPROM_DEFINITION]
+Value=
+[FILES]
+Count=4
+File0=ft90x.c
+File1=..\..\bin\FT90x\lora_rf.c
+File2=..\..\bin\FT90x\lora_rf_hal.c
+File3=..\..\bin\FT90x\lora_rf_hw.c
+[BINARIES]
+Count=0
+[IMAGES]
+Count=0
+ActiveImageIndex=-1
+[OPENED_FILES]
+Count=3
+File0=ft90x.c
+File1=..\..\bin\FT90x\lora_rf_hal.c
+File2=..\..\..\..\C4W\Mikroelektronika\mikroC PRO for FT90x\uses\__Lib_TFT_16bit_Defs.c
+[EEPROM]
+Count=0
+[ACTIVE_COMMENTS_FILES]
+Count=0
+[OTHER_FILES]
+Count=0
+[SEARCH_PATH]
+Count=5
+Path0=C:\C4W\Mikroelektronika\mikroC PRO for FT90x\defs\
+Path1=C:\C4W\Mikroelektronika\mikroC PRO for FT90x\uses\
+Path2=C:\ClickLibraries\Rf_LoRa_Click\example\FT90x\
+Path3=C:\ClickLibraries\Rf_LoRa_Click\bin\FT90x\
+Path4=C:\ClickLibraries\Rf_LoRa_Click\library\include\
+[HEADER_PATH]
+Count=1
+Path0=C:\ClickLibraries\Rf_LoRa_Click\library\include\
+[HEADERS]
+Count=3
+File0=..\..\library\include\lora_rf.h
+File1=..\..\library\include\lora_rf_hal.h
+File2=..\..\library\include\lora_rf_hw.h
+[PLDS]
+Count=0
+[Useses]
+Count=5
+File0=Conversions
+File1=C_String
+File2=C_Stdlib
+File3=C_Type
+File4=UART
+[EXPANDED NODES]
+Node1=Sources
+Node2=Header Files
+Count=2
