@@ -1,15 +1,29 @@
-> ![MikroE](http://www.mikroe.com/img/designs/beta/logo_small.png)
-> #Lora RF Click#
-> ##By [MikroElektronika](http://www.mikroe.com)
+![MikroE](http://www.mikroe.com/img/designs/beta/logo_small.png)
+
+![LoRa_RF_click](http://www.mikroe.com/img/news/2015/12/lora_rf_click_banner_news.png)
+
 ---
 
-## Installation
-Use the package manager to install the library for your architecture.
+[Product Page](http://www.mikroe.com/click/lora-rf/)
 
-### Test communication with the module
-All posible radio functions for LoRa RF click board are listed in this example.
-Test is for PIC32 MCUs, other platforms will have differences in system_init function
-and UART interrupt routine.
+[Learn Page](http://learn.mikroe.com/lora-rf-click-solution-for-iot-developers/)
+
+---
+
+###General Description
+LoRa RF click carries Microchip’s RN2483 fully certified LoRa Sub-GHz, 433/868 MHz European R&TTE Directive Assessed Radio Modem. Two antenna connectors allow you to choose which of the two frequency bands will be employed. The RN2483 module has a specified range of >15km in rural and suburban settings, and >5km coverage in urban areas. A LoRaWAN™ Class A protocol stack is embedded (bidirectional end devices), as well as an ASCII command interface accessible through UART. The high receiver sensitivity can go down to -148 dBm. LoRa RF click communicates with the target board MCU through the mikroBUS™ UART interface (CTS, TXD, RXD), with the addition of a Reset pin (RST). The board is designed to use either a 3.3V or a 5V power supply.
+
+---
+
+###Example
+
+#### Configuration
+* MCU:             STM32F107VC
+* Dev.Board:       EasyMx Pro v7
+* Oscillator:      72 Mhz internal
+* Ext. Modules:    SHT Click
+* SW:              MikroC PRO for ARM 4.7.4
+
 ```
 #include "lora_rf.h"
 
