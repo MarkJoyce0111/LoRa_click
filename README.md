@@ -21,7 +21,7 @@ LoRa RF click carries Microchip’s RN2483 fully certified LoRa Sub-GHz, 433/868
 * MCU:             STM32F107VC
 * Dev.Board:       EasyMx Pro v7
 * Oscillator:      72 Mhz internal
-* Ext. Modules:    SHT Click
+* Ext. Modules:    LoRa RF Click
 * SW:              MikroC PRO for ARM 4.7.4
 
 ```
