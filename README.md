@@ -1,169 +1,221 @@
 ![MikroE](http://www.mikroe.com/img/designs/beta/logo_small.png)
 
-![LoRa_RF_click](http://www.mikroe.com/img/news/2015/12/lora_rf_click_banner_news.png)
+![CLICKNAME_click](http://www.mikroe.com/img/news/2015/12/lora_rf_click_banner_news.png)
+
+---
+[Product Page](http://www.mikroe.com/)
+
+[Manual Page](http://docs.mikroe.com/)
+
+[Learn Page](http://learn.mikroe.com/)
 
 ---
 
-[Product Page](http://www.mikroe.com/click/lora-rf/)
+### General Description
 
-[Learn Page](http://learn.mikroe.com/lora-rf-click-solution-for-iot-developers/)
+Microchip’s RN2483 (RN2903) Low-Power Long Range LoRa
+Technology Transceiver module provides an easy to
+use, low-power solution for long range wireless data
+transmission.
+
+The RN2483 module complies with the LoRaWAN
+Class A protocol specifications. It integrates RF, a
+baseband controller, command Application
+Programming Interface (API) processor, making it a
+complete long range Solution.
+
+The RN2483 (RN2903) module is suitable for simple long range
+sensor applications with external host MCU.
 
 ---
 
-###General Description
-LoRa RF click carries Microchip’s RN2483 fully certified LoRa Sub-GHz, 433/868 MHz European R&TTE Directive Assessed Radio Modem. Two antenna connectors allow you to choose which of the two frequency bands will be employed. The RN2483 module has a specified range of >15km in rural and suburban settings, and >5km coverage in urban areas. A LoRaWAN™ Class A protocol stack is embedded (bidirectional end devices), as well as an ASCII command interface accessible through UART. The high receiver sensitivity can go down to -148 dBm. LoRa RF click communicates with the target board MCU through the mikroBUS™ UART interface (CTS, TXD, RXD), with the addition of a Reset pin (RST). The board is designed to use either a 3.3V or a 5V power supply.
+### Features
+
+- General Features
+	+ On-board LoRaWANTM Class A protocol stack
+	+ ASCII command interface over UART
+	+ European R&TTE Directive Assessed Radio Module
+
+- RF Features
+	+ Low-Power Long Range Transceiver operating in
+	the 433 MHz and 868 MHz frequency bands
+	+ High Receiver Sensitivity: down to -148 dBm
+	+ TX Power: adjustable up to +14 dBm high
+	efficiency PA
+	+ FSK, GFSK, and LoRa Technology modulation
+	+ >15 km coverage at suburban and >5 km
+	coverage at urban area
 
 ---
 
-###Example
+### Example
 
 #### Configuration
 * MCU:             STM32F107VC
 * Dev.Board:       EasyMx Pro v7
 * Oscillator:      72 Mhz internal
-* Ext. Modules:    LoRa RF Click
-* SW:              MikroC PRO for ARM 4.7.4
+* Ext. Modules:    LoRa click
+* SW:              MikroC PRO for ARM 4.9.1
 
 ```
-#include "lora_rf.h"
+#include <stdlib.h>
+#include "lora.h"
+#include "resources.h"
 
-sbit RF_LORA_RST at LATC1_bit;
-sbit RF_LORA_RST_Direction at TRISC1_bit;
+#define _DEBUG_
 
-char rsp[ 256 ];
+#if defined _DEBUG_
+#define LOG(x)        UART1_Write_Text(x)
+#endif
 
+// TFT pins
+unsigned int TFT_DataPort at GPIOE_ODR;
+sbit TFT_RST at GPIOE_ODR.B8;
+sbit TFT_RS at GPIOE_ODR.B12;
+sbit TFT_CS at GPIOE_ODR.B15;
+sbit TFT_RD at GPIOE_ODR.B10;
+sbit TFT_WR at GPIOE_ODR.B11;
+sbit TFT_BLED at GPIOE_ODR.B9;
+
+// Lora RF pins
+sfr sbit LORA_RST at GPIOC_ODR.B2;
+sfr sbit LORA_RTS at GPIOD_ODR.B13;
+sfr sbit LORA_CTS at GPIOD_IDR.B10;
+
+char tmp_txt[ 50 ];
+char tmp_int[ 50 ];
+
+// Function prototypes
 void system_init( void );
+void display_init( void );
+void convert_temp( void );
+void lora_cbk( char *response );
 
-void system_init( )
+// Function definitions
+void system_init( void )
 {
-    RF_LORA_RST_Direction = 0;
-    Delay_ms( 100 );
+    GPIO_Digital_Output( &GPIOC_BASE, _GPIO_PINMASK_2 );
+    GPIO_Digital_Output( &GPIOD_BASE, _GPIO_PINMASK_13 );
+    GPIO_Digital_Input( &GPIOD_BASE, _GPIO_PINMASK_10 );
+    Delay_ms( 200 );
 
-    UART5_Init( 115200 );
-    Delay_ms( 100 );
-    UART2_Init( 57600 );
-    Delay_ms( 100 );
+#if defined _DEBUG_
+    UART1_Init_Advanced( 115200, _UART_8_BIT_DATA,
+                                 _UART_NOPARITY,
+                                 _UART_ONE_STOPBIT,
+                                 &_GPIO_MODULE_USART1_PA9_10 );
+    Delay_ms( 200 );
+#endif
 
-    AD1PCFG = 0xFFFF;
+    UART3_Init_Advanced( 57600, _UART_8_BIT_DATA,
+                                _UART_NOPARITY,
+                                _UART_ONE_STOPBIT,
+                                &_GPIO_MODULE_USART3_PD89 );
+    Delay_ms( 200 );
 
-    U2IP0_bit = 0;
-    U2IP1_bit = 1;
-    U2IP2_bit = 1;
-    U2RXIE_bit = 1;
+    RXNEIE_USART3_CR1_bit = 1;
+    NVIC_IntEnable( IVT_INT_USART3 );
     EnableInterrupts();
+    Delay_ms( 500 );
+
+#if defined _DEBUG_
+    LOG( "< Initialization done >\r\n" );
+#endif
 }
 
-void get_response( char *resp )
+void display_init()
 {
-    UART5_Write_Text( resp );
-    UART5_Write_Text( "\r\n" );
+    TFT_Init_ILI9341_8bit( 320, 240 );
+    TFT_BLED = 1;
+    TFT_Set_Pen( CL_WHITE, 1 );
+    TFT_Set_Brush( 1, CL_WHITE, 0, 0, 0, 0 );
+    TFT_Set_Font( TFT_defaultFont, CL_BLACK, FO_HORIZONTAL );
+    TFT_Fill_Screen( CL_WHITE );
+    TFT_Set_Pen( CL_BLACK, 1 );
+    TFT_Line(  20,  46, 300,  46 );
+    TFT_Line(  20,  70, 300,  70 );
+    TFT_Line(  20, 220, 300, 220 );
+    TFT_Set_Pen( CL_WHITE, 1 );
+    TFT_Set_Font( &HandelGothic_BT21x22_Regular, CL_RED, FO_HORIZONTAL );
+    TFT_Write_Text( "Lora click", 108, 14 );
+    TFT_Set_Font( &Verdana12x13_Regular, CL_BLACK, FO_HORIZONTAL );
+    TFT_Write_Text("EasyMx PRO v7 for STM32", 19, 223);
+    TFT_Set_Font( &Verdana12x13_Regular, CL_RED, FO_HORIZONTAL );
+    TFT_Write_Text( "www.mikroe.com", 200, 223 );
+    TFT_Set_Font( &Tahoma15x16_Bold, CL_BLACK, FO_HORIZONTAL );
+    TFT_Write_Text( "Temperature :", 40, 120 );
+}
+
+void convert_temp( void )
+{
+    unsigned int raw_temp;
+    float real_temp;
+
+    raw_temp = xtoi( &tmp_txt[ 10 ] );
+    real_temp = ( float )( raw_temp * 0.0625f );
+    sprintf( tmp_int, "%2.1f C", real_temp );
+}
+
+void lora_cbk( char* response )
+{
+
 }
 
 void main()
 {
     system_init();
-    lora_rf_init();
-    lora_rf_callback( get_response );
+    display_init();
+    lora_init( false, false, false, lora_cbk );
+
+    lora_cmd( "sys get ver", "", tmp_txt );
+    TFT_Set_Font( &Tahoma15x16_Bold, CL_BLUE, FO_HORIZONTAL );
+    TFT_Write_Text( tmp_txt, 50, 50 );
     
-    lora_rf_sleep( 300 );
-    lora_rf_reset();
-    lora_rf_set_eeprom( 0x301, "AA" );
-    lora_rf_eeprom( 0x301, rsp );
-    lora_rf_fw_ver( rsp );
-    lora_rf_vdd( rsp );
-    lora_rf_hw_eui( rsp );
-    lora_rf_mac_reset( BND_868 );
-    lora_rf_join( JM_ABP );
-    lora_rf_save();
-    lora_rf_force_en();
-    lora_rf_pause( rsp );
-    lora_rf_set_dev_addr( "0A0A0A0A" );
-    lora_rf_dev_addr( rsp );
-    lora_rf_set_dev_eui( "000000000000000E" );
-    lora_rf_dev_eui( rsp );
-    lora_rf_set_app_eui( "000000000000FFFE" );
-    lora_rf_app_eui( rsp );
-    lora_rf_set_pwridx( 5 );
-    lora_rf_pwridx( rsp );
-    lora_rf_set_dr( 5 );
-    lora_rf_dr( rsp );
-    lora_rf_set_adr( STATUS_ON );
-    lora_rf_adr( rsp );
-    lora_rf_set_retr( 200 );
-    lora_rf_retr( rsp );
-    lora_rf_set_rx_1_dly( 2000 );
-    lora_rf_rx_1_dly( rsp );
-    lora_rf_set_ar( STATUS_ON );
-    lora_rf_ar( rsp );
-    lora_rf_set_rx2( 5, 86500000 );
-    lora_rf_rx2( BND_868, rsp );
-    lora_rf_set_ch_freq( 5, 865000000 );
-    lora_rf_ch_freq( 5, rsp );
-    lora_rf_set_ch_dcycle( 5, 2000 );
-    lora_rf_ch_dcycle( 5, rsp );
-    lora_rf_set_ch_dr_rng( 5, 3, 6 );
-    lora_rf_ch_dr_rng( 5, rsp );
-    lora_rf_set_ns_key( "000000000000000000000000000000AE" );
-    lora_rf_set_as_key( "000000000000000000000000000AB000" );
-    lora_rf_set_app_key( "00000000000000000000CE0000000000" );
-    lora_rf_set_battery( 125 );
-    lora_rf_set_lnk_chk( 2000 );
-    lora_rf_band( rsp );
-    lora_rf_rx_2_dly( rsp );
-    lora_rf_dcycle_ps( rsp );
-    lora_rf_dem_marg( rsp );
-    lora_rf_status( rsp );
-    lora_rf_rx( 50, "AC" );
-    lora_rf_tx( "AB" );
-    lora_rf_cw( STATUS_ON );
-    lora_rf_cw( STATUS_OFF );
-    lora_rf_set_bt( "1.0" );
-    lora_rf_bt( rsp );
-    lora_rf_set_mod( MOD_LORA );
-    lora_rf_mod( rsp );
-    lora_rf_set_freq( 864000000 );
-    lora_rf_freq( rsp );
-    lora_rf_set_power( 4 );
-    lora_rf_power( rsp );
-    lora_rf_set_sf( "sf7" );
-    lora_rf_sf( rsp );
-    lora_rf_set_freq_corr( "250" );
-    lora_rf_freq_corr( rsp );
-    lora_rf_set_rx_bw( "250" );
-    lora_rf_rx_bw( rsp );
-    lora_rf_set_fsk_br( 20000 );
-    lora_rf_fsk_br( rsp );
-    lora_rf_set_freq_dev( 20000 );
-    lora_rf_freq_dev( rsp );
-    lora_rf_set_pr_len( 20000 );
-    lora_rf_pr_len( rsp );
-    lora_rf_set_crc( STATUS_ON );
-    lora_rf_crc( rsp );
-    lora_rf_set_iq_inv( STATUS_ON );
-    lora_rf_iq_inv( rsp );
-    lora_rf_set_cr( "4/6" );
-    lora_rf_cr( rsp );
-    lora_rf_set_wdog( 5000 );
-    lora_rf_wdog( rsp );
-    lora_rf_set_bw( 125 );
-    lora_rf_bw( rsp );
-    lora_rf_syncw( "FE" );
-    lora_rf_snr( rsp );
+    lora_cmd( "mac pause", "", tmp_txt );
+#if defined _DEBUG_
+    LOG( tmp_txt );
+    LOG( "\r\n\r\n" );
+#endif
+        
+    lora_cmd( "radio set wdt", "0", tmp_txt );
+#if defined _DEBUG_
+    LOG( tmp_txt );
+    LOG( "\r\n\r\n" );
+#endif
 
     while( 1 )
     {
-        lora_rf_process();
+        if( !lora_rx( 5000, tmp_txt ) )
+        {
+            TFT_Rectangle( 10, 190, 310, 218 );
+            TFT_Set_Font( &Tahoma15x16_Bold, CL_GREEN, FO_HORIZONTAL );
+            TFT_Write_Text( " TEMPERATURE RECEIVED ", 80, 190 );
+            TFT_Rectangle( 160, 117, 220, 188 );
+            convert_temp();
+            TFT_Set_Font( &HandelGothic_BT21x22_Regular, CL_GRAY, FO_HORIZONTAL );
+            TFT_Write_Text( tmp_int, 160, 117 );
+        }
+        else {
+        
+            TFT_Rectangle( 10, 190, 310, 218 );
+            TFT_Set_Font( &Tahoma15x16_Bold, CL_RED, FO_HORIZONTAL );
+            TFT_Write_Text( " LORA RADIO ERROR ", 90, 190 );
+        }
+#if defined _DEBUG_
+        LOG( "  Response : " );
+        LOG( tmp_txt );
+        LOG( "\r\n\r\n" );
+        Delay_ms( 3000 );
+#endif
     }
 }
 
-void UART2interrupt() iv IVT_UART_2 ilevel 6 ics ICS_AUTO
+void LO_RX_ISR() iv IVT_INT_USART3 ics ICS_AUTO
 {
-      if( IFS1 & ( 1 << U2RXIF ))
-      {
-           char tmp = UART2_Read();
-           lora_rf_rx_isr( tmp );
-           U2RXIF_bit = 0;
-      }
+     if( RXNE_USART3_SR_bit )
+     {
+         char tmp = USART3_DR;
+         lora_rx_isr( tmp );
+     }
 }
-
 ```

@@ -1,0 +1,11 @@
+*.asm
+*.bin
+*.cp
+*.css
+*.hex
+*.js
+*.mcl
+*.emcl
+*.o
+*.txt
+*.*.ini
