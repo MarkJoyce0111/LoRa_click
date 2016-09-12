@@ -49,3 +49,4 @@ Library handles communication with the module, usable on various MCU types.
 To achive portability it requires proper user UART interrupt implementation.
 More details can be found in documentation provided. 
 
+1.1 kB of RAM at least is required for the proper functionality.
