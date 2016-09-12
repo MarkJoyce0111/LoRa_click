@@ -18,14 +18,8 @@
 /******************************************************************************
 * Includes
 *******************************************************************************/
-#include "lora_hal.h"
-/******************************************************************************
-* Module Preprocessor Constants
-*******************************************************************************/
 
-/******************************************************************************
-* Module Preprocessor Macros
-*******************************************************************************/
+#include "lora_hal.h"
 
 /******************************************************************************
 * Module Typedefs
@@ -53,14 +47,11 @@ static int use_cts;
     defined( __MIKROC_PRO_FOR_DSPIC__ ) || \
     defined( __MIKROC_PRO_FOR_8051__ )  || \
     defined( __MIKROC_PRO_FOR_FT90x__ )
+#define _MIKROC_
 extern sfr sbit LORA_RST;
 extern sfr sbit LORA_RTS;
 extern sfr sbit LORA_CTS;
 #endif
-
-/******************************************************************************
-* Function Prototypes
-*******************************************************************************/
 
 /******************************************************************************
 * Function Definitions
@@ -71,13 +62,7 @@ void lora_hal_rst
         int logic
 )
 {
-#if defined( __MIKROC_PRO_FOR_ARM__ )   || \
-    defined( __MIKROC_PRO_FOR_AVR__ )   || \
-    defined( __MIKROC_PRO_FOR_PIC__ )   || \
-    defined( __MIKROC_PRO_FOR_PIC32__ ) || \
-    defined( __MIKROC_PRO_FOR_DSPIC__ ) || \
-    defined( __MIKROC_PRO_FOR_8051__ )  || \
-    defined( __MIKROC_PRO_FOR_FT90x__ )
+#if defined( _MIKROC_ )
     if( logic )
         LORA_RST = 1;
     else
@@ -92,13 +77,7 @@ int lora_hal_rts
 {
     if( use_rts )
     {
-#if defined( __MIKROC_PRO_FOR_ARM__ )   || \
-    defined( __MIKROC_PRO_FOR_AVR__ )   || \
-    defined( __MIKROC_PRO_FOR_PIC__ )   || \
-    defined( __MIKROC_PRO_FOR_PIC32__ ) || \
-    defined( __MIKROC_PRO_FOR_DSPIC__ ) || \
-    defined( __MIKROC_PRO_FOR_8051__ )  || \
-    defined( __MIKROC_PRO_FOR_FT90x__ )
+#if defined( _MIKROC_ )
         return ( int )LORA_RTS;
 #endif
     }
@@ -113,13 +92,7 @@ void lora_hal_cts
 {
     if( use_cts )
     {
-#if defined( __MIKROC_PRO_FOR_ARM__ )   || \
-    defined( __MIKROC_PRO_FOR_AVR__ )   || \
-    defined( __MIKROC_PRO_FOR_PIC__ )   || \
-    defined( __MIKROC_PRO_FOR_PIC32__ ) || \
-    defined( __MIKROC_PRO_FOR_DSPIC__ ) || \
-    defined( __MIKROC_PRO_FOR_8051__ )  || \
-    defined( __MIKROC_PRO_FOR_FT90x__ )
+#if defined( _MIKROC_ )
         if( stop )
             LORA_CTS = 1;
         else
@@ -127,13 +100,7 @@ void lora_hal_cts
 #endif
     }
     else {
-#if defined( __MIKROC_PRO_FOR_ARM__ )   || \
-    defined( __MIKROC_PRO_FOR_AVR__ )   || \
-    defined( __MIKROC_PRO_FOR_PIC__ )   || \
-    defined( __MIKROC_PRO_FOR_PIC32__ ) || \
-    defined( __MIKROC_PRO_FOR_DSPIC__ ) || \
-    defined( __MIKROC_PRO_FOR_8051__ )  || \
-    defined( __MIKROC_PRO_FOR_FT90x__ )
+#if defined( _MIKROC_ )
         LORA_CTS = 0;
 #endif
     }
@@ -145,13 +112,7 @@ void lora_hal_init
         int cts_use
 )
 {
-#if defined( __MIKROC_PRO_FOR_ARM__ )      || \
-    defined( __MIKROC_PRO_FOR_AVR__ )   || \
-    defined( __MIKROC_PRO_FOR_PIC__ )   || \
-    defined( __MIKROC_PRO_FOR_PIC32__ ) || \
-    defined( __MIKROC_PRO_FOR_DSPIC__ ) || \
-    defined( __MIKROC_PRO_FOR_8051__ )  || \
-    defined( __MIKROC_PRO_FOR_FT90x__ )
+#if defined( _MIKROC_ )
     write_uart_p = UART_Wr_Ptr;
 #endif
 

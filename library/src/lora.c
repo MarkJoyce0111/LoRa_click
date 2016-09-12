@@ -26,14 +26,6 @@
 *******************************************************************************/
 
 /******************************************************************************
-* Module Preprocessor Macros
-*******************************************************************************/
-
-/******************************************************************************
-* Module Typedefs
-*******************************************************************************/
-
-/******************************************************************************
 * Module Variable Definitions
 *******************************************************************************/
 
@@ -66,24 +58,24 @@ static void ( *_callback_resp )( char *response );
 /* String functions for constants */
 static void _strcpy_const
 (
-		char* dst,
+	char* dst,
         const char* src
 );
 
 static void _strcat_const
 (
-		char* dst,
+	char* dst,
         const char* src
 );
 
 static void _lora_resp
 (
-		void
+	void
 );
 
 static int _lora_par
 (
-		void
+	void
 );
 
 static void _lora_read
@@ -432,7 +424,10 @@ int lora_tx
     return _lora_repar();
 }
 
-void lora_rx_isr( char rx_input )
+void lora_rx_isr
+( 
+	char rx_input 
+)
 {
     static bool _rx_sentence_f;
 
@@ -455,14 +450,20 @@ void lora_rx_isr( char rx_input )
     }
 }
 
-void lora_tick_isr()
+void lora_tick_isr
+(
+	void
+)
 {
     if( _timer_use_f )
         if( _timer_f && ( _ticker++ > _timer_max ) )
             _timeout_f = true;
 }
 
-void lora_tick_conf( uint32_t timer_limit )
+void lora_tick_conf
+( 
+	uint32_t timer_limit 
+)
 {
     if ( timer_limit )
     {
@@ -475,4 +476,5 @@ void lora_tick_conf( uint32_t timer_limit )
         _timer_use_f = false;
     }
 }
+
 /*************** END OF FUNCTIONS *********************************************/
