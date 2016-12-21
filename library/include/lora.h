@@ -1,23 +1,11 @@
-/****************************************************************************
-* Title                 :   LORA RF CLICK ENGINE
-* Filename              :   lora_rf_engine.h
-* Author                :   MSV
-* Origin Date           :   24/11/2015
-* Notes                 :   None
-*****************************************************************************/
-/**************************CHANGE LIST **************************************
-*
-*    Date    Software Version    Initials   Description
-*  24/11/15         2.0            MSV       Interface Created.
-*
-*****************************************************************************/
 /**
  * @file lora.h
  * @brief  HW library
  *
  * @par
  * Hardware and communication control.
- */
+ *
+ ******************************************************************************/
 
 /**
  * @page SCH Schematic
@@ -59,7 +47,7 @@
  * ### General Description ###
  *
  * @par
- * LoRa click carries Microchip's RN2483 fully certified LoRa Sub-GHz,
+ * LoRa RF click carries Microchip's RN2483 fully certified LoRa Sub-GHz,
  * 433/868 MHz European R&TTE Directive Assessed Radio Modem.
  * Two antenna connectors allow you to choose which of the two frequency bands
  * will be employed.
@@ -132,7 +120,6 @@
 /******************************************************************************
 * Preprocessor Constants
 *******************************************************************************/
-
 /**
  * Timer Limit ( ms ) */
 #define TIMER_EXPIRED                                       20000
@@ -150,7 +137,6 @@
 #define MAX_DATA_SIZE                                       256
 
 #define MAX_TRANSFER_SIZE                                   384
-
 /******************************************************************************
 * Configuration Constants
 *******************************************************************************/
@@ -159,6 +145,10 @@
 #define LORA_JOIN                           "mac join "
 #define LORA_RADIO_TX                       "radio tx "
 #define LORA_RADIO_RX                       "radio rx "
+
+/******************************************************************************
+* Macros
+*******************************************************************************/
 
 /******************************************************************************
 * Typedefs
@@ -225,23 +215,14 @@ extern "C"{
 /**
  * @brief Initialization
  *
- * Initialization of the module. Performs hardware reset of the module and
- * re-initialization of the all variables inside the library.
+ * Must be called before any other operation. Resets the module and sets all
+ * flags and parameters to default value.
  *
- * @note Module response from with current firmware version after every hardware
- * restart - function ignores that, but response if needed can be cached with
- * callback.
+ * @note Module restart issues the response from the module with current
+ * firmware version.
  *
- * @param[in] - RTS_line - usage of RTS pin for flow control - firmware on the
- * module is not supporting hardware flow control
- *
- * @param[in] - CTS_line - usage of CTS pin for flow control - firmware on the
- * module is not supporting hardware flow control
- *
- * @param[in] - CB_default -
- *
- * @param[in] - response_p - pointer to user created function which is callback
- * in case that no function is called
+ * @param[in] - pointer to user made callback function that receiving response
+ *      as argument and will be executed one every response
  *
  */
 void lora_init
@@ -253,29 +234,39 @@ void lora_init
 );
 
 /**
+ * @brief Callback function
+ *
+ * @warning User should avoid usage of this function if functionality
+ * of @link lora_rf.h @endlink is needed. Usage of this function after the
+ * library initialization is not
+ *
+ * Use
+ * @link lora_rf_callback @endlink
+ * to monitor module responses.
+ */
+void lora_rf_set_callback( void ( *response_p )( char *response ) );
+
+/**
  * @brief Main Process
  *
- * Function should be placed inside the infinite while loop or run as thread.
- * That's a must in case of callbacks usage.
- *
+ * Function must be placed inside the infinite while loop.
  */
 void lora_process( void );
 
 /**
  * @brief Receiver
  *
- * Must be placed inside the user made UART interrupt routine.
+ * Must be placed inside the user made uart interrupt routine.
  *
- * @param[in] rx_input - data from UART receive register
+ * @param[in] rx_input - data from uart receive register
  */
 void lora_rx_isr( char rx_input );
 
 /**
- * @brief Timer Tick
+ * @brief Timer
  *
  * Used for host timing. Should be placed inside the previously made interrupt
- * routine made by user that occurs on every one milisecond. In case of host
- * watchdog usage that's a must.
+ * routine made by user that occurs on every one milisecond.
  */
 void lora_tick_isr( void );
 
@@ -300,19 +291,18 @@ void lora_tick_conf
 );
 
 /**
- * @brief Command
+ * @brief Sender
  *
- * Send command to the module
+ * Used by parser to send data inside the software buffer. User can send valid
+ * commands with this function but command string and data should be well
+ * formated.
  *
- * @param[in] cmd - well formated command string
- *
- * @param[in] args - in cases when there is no arguments empty string must be
- * provided
- *
- * @param[out] response
- *
- * @return 0 / error codes
+ * @param[in] command - well formated command string
+ * @param[in] cmd_len - command string length
+ * @param[in] buffer - data buffer if needed
+ * @param[in] count - size of data
  */
+
 void lora_cmd
 (
         char *cmd,
@@ -320,19 +310,6 @@ void lora_cmd
         char *response
 );
 
-/**
- * @brief MAC Transmission
- *
- * @param[in] payload - payload type @link PL_t @endlink
- *
- * @param[in] port_no - port number ( 1 ~ 223 )
- *
- * @param[in] buffer - data for transmission
- *
- * @param[out] response
- *
- * @return 0 / error codes
- */
 int lora_mac_tx
 (
         PL_t payload,
@@ -341,59 +318,18 @@ int lora_mac_tx
         char *response
 );
 
-/**
- * @brief Join Procedure
- *
- * @param[in] join_mode - join procedure type @link JM_t @endlink
- *
- * @param[out] response
- *
- * @return 0 / error codes
- */
 int lora_join
 (
         JM_t join_mode,
         char *response
 );
 
-/**
- * @brief Radio Receive
- *
- * @note
- * MAC must be paused before any radio reception
- *
- * @note
- * Ensure the radio Watchdog Timer time out is higher than the receive
- * window size.
- *
- * @param[in] window_size - 0 represents continuous reception
- *
- * @param[out] response - in case of successful execution represents received
- * data
- *
- * @return 0 / error codes
- */
 int lora_rx
 (
         uint16_t window_size,
         char *response
 );
 
-/**
- * @brief Radio Transmission
- *
- * @note
- * Data must be provided as string where every character represents the
- * hexadecimal digit. Data length allowed is 0 to 255 bytes for LoRa modulation
- * and from 0 to 64 bytes for FSK modulation.
- *
- * @note
- * MAC must be paused before any radio transmission
- *
- * @param[in] buffer - data for transmission
- *
- * @return 0 / error codes
- */
 int lora_tx
 (
         char *buffer
@@ -403,6 +339,6 @@ int lora_tx
 } // extern "C"
 #endif
 
-#endif // LORA_H
+#endif // LORA_RF_ENGINE_H
 
 /*** End of File **************************************************************/

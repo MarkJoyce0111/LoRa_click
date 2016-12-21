@@ -1,35 +1,18 @@
-/****************************************************************************
-* Title                 :   LORA RF CLICK HAL
-* Filename              :   lora_rf_hal.h
-* Author                :   MSV
-* Origin Date           :   02/12/2015
-* Notes                 :   None
-*****************************************************************************/
-/**************************CHANGE LIST **************************************
-*
-*    Date    Software Version    Initials   Description
-*  02/12/15    XXXXXXXXXXX         MSV      Interface Created.
-*
-*****************************************************************************/
 /**
  * @file lora_hal.h
  *
- * @brief Hal layer for the Mikroelektronika's RF Lora click board.
- */
+ * @brief Hal layer for the Mikroelektronika's Lora click board.
+ *
+ ******************************************************************************/
 
-#ifndef LORA_RF_HAL_H_
-#define LORA_RF_HAL_H_
-
-/******************************************************************************
-* Includes
-*******************************************************************************/
+#ifndef LORA_HAL_H_
+#define LORA_HAL_H_
 
 #include <stdint.h>
 
 /******************************************************************************
 * Function Prototypes
 *******************************************************************************/
-
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -48,9 +31,7 @@ void lora_hal_init
 /**
  * @brief Hardware Reset Pin
  *
- * Sets RST pin.
- *
- * @param[in] - logic ( 1 - high / 0 - low )
+ * Sets RST pin to logic high.
  */
 void lora_hal_rst
 (
@@ -60,7 +41,7 @@ void lora_hal_rst
 /**
  * @brief RTS Line
  *
- * Gets RST pin to logic.
+ * Sets RST pin to logic low.
  */
 int lora_hal_rts
 (
@@ -78,9 +59,10 @@ void lora_hal_cts
 );
 
 /**
- * @brief UART write
+ * @brief lora_rf_hal_write
+ * @param ch
  *
- * @param[in] ch - input char
+ * @return
  */
 void lora_hal_write
 (

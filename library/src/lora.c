@@ -26,13 +26,21 @@
 *******************************************************************************/
 
 /******************************************************************************
+* Module Preprocessor Macros
+*******************************************************************************/
+
+/******************************************************************************
+* Module Typedefs
+*******************************************************************************/
+
+/******************************************************************************
 * Module Variable Definitions
 *******************************************************************************/
 
 /* Buffers */
 static volatile char            _tx_buffer[ MAX_TRANSFER_SIZE ];
 static volatile char            _rx_buffer[ MAX_TRANSFER_SIZE ];
-static volatile int             _rx_buffer_len;
+static volatile uint16_t        _rx_buffer_len;
 
 /* Timer Flags and Counter */
 static volatile bool            _timer_f;
@@ -47,7 +55,7 @@ static volatile bool            _lora_rdy_f;
 
 /* Response vars */
 static bool                     _rsp_f;
-static char**                   _rsp_buffer;
+static char*                    _rsp_buffer;
 static bool                     _callback_default;
 static void ( *_callback_resp )( char *response );
 
@@ -58,24 +66,24 @@ static void ( *_callback_resp )( char *response );
 /* String functions for constants */
 static void _strcpy_const
 (
-	char* dst,
+                char* dst,
         const char* src
 );
 
 static void _strcat_const
 (
-	char* dst,
+                char* dst,
         const char* src
 );
 
 static void _lora_resp
 (
-	void
+                void
 );
 
 static int _lora_par
 (
-	void
+                void
 );
 
 static void _lora_read
@@ -94,8 +102,8 @@ static void _lora_write
 
 static void _strcpy_const
 (
-		char* dst,
-		const char* src
+                char* dst,
+                const char* src
 )
 {
     while ( ( *dst++ = *src++ ) != '\0' );
@@ -103,8 +111,8 @@ static void _strcpy_const
 
 static void _strcat_const
 (
-		char* dst,
-		const char* src
+                char* dst,
+                const char* src
 )
 {
     _strcpy_const( &dst[ strlen( dst ) ], src );
@@ -112,65 +120,65 @@ static void _strcat_const
 
 static void _lora_resp
 (
-		void
+                void
 )
 {
-	_rx_buffer_len  = 0;
-	_lora_rdy_f     = false;
-	_rsp_rdy_f      = false;
-	_rsp_f      	= true;
+        _rx_buffer_len  = 0;
+        _lora_rdy_f     = false;
+        _rsp_rdy_f      = false;
+        _rsp_f              = true;
 }
 
 static int _lora_par
 (
-		void
+                void
 )
 {
-	if( !strcmp( _rx_buffer, "invalid_param" ) )
-	    return 1;
-	if( !strcmp( _rx_buffer, "not_joined" ) )
-	    return 2;
-	if( !strcmp( _rx_buffer, "no_free_ch" ) )
-	    return 3;
-	if( !strcmp( _rx_buffer, "silent" ) )
-	    return 4;
-	if( !strcmp( _rx_buffer, "frame_counter_err_rejoin_needed" ) )
-	    return 5;
-	if( !strcmp( _rx_buffer, "busy" ) )
-	    return 6;
-	if( !strcmp( _rx_buffer, "mac_paused" ) )
-	    return 7;
-	if( !strcmp( _rx_buffer, "invalid_data_len" ) )
-	    return 8;
-	if( !strcmp( _rx_buffer, "keys_not_init" ) )
-	    return 9;
-	return 0;
+        if( !strcmp( _rx_buffer, "invalid_param" ) )
+            return 1;
+        if( !strcmp( _rx_buffer, "not_joined" ) )
+            return 2;
+        if( !strcmp( _rx_buffer, "no_free_ch" ) )
+            return 3;
+        if( !strcmp( _rx_buffer, "silent" ) )
+            return 4;
+        if( !strcmp( _rx_buffer, "frame_counter_err_rejoin_needed" ) )
+            return 5;
+        if( !strcmp( _rx_buffer, "busy" ) )
+            return 6;
+        if( !strcmp( _rx_buffer, "mac_paused" ) )
+            return 7;
+        if( !strcmp( _rx_buffer, "invalid_data_len" ) )
+            return 8;
+        if( !strcmp( _rx_buffer, "keys_not_init" ) )
+            return 9;
+        return 0;
 }
 
 static int _lora_repar
 (
-		void
+                void
 )
 {
-	if( !strcmp( _rx_buffer, "mac_err" ) )
-	    return 10;
-	if( !strcmp( _rx_buffer, "mac_tx_ok" ) )
-	    return 0;
-	if( !strcmp( _rx_buffer, "mac_rx" ) )
-	    return 12;
-	if( !strcmp( _rx_buffer, "invalid_data_len" ) )
-	    return 13;
-	if( !strcmp( _rx_buffer, "radio_err" ) )
-	    return 14;
-	if( !strcmp( _rx_buffer, "radio_tx_ok" ) )
-	    return 0;
-	if( !strcmp( _rx_buffer, "radio_rx" ) )
-	    return 0;
-	if( !strcmp( _rx_buffer, "accepted" ) )
-	    return 0;
-	if( !strcmp( _rx_buffer, "denied" ) )
-	    return 18;
-	return 0;
+        if( !strcmp( _rx_buffer, "mac_err" ) )
+            return 10;
+        if( !strcmp( _rx_buffer, "mac_tx_ok" ) )
+            return 0;
+        if( !strcmp( _rx_buffer, "mac_rx" ) )
+            return 12;
+        if( !strcmp( _rx_buffer, "invalid_data_len" ) )
+            return 13;
+        if( !strcmp( _rx_buffer, "radio_err" ) )
+            return 14;
+        if( !strcmp( _rx_buffer, "radio_tx_ok" ) )
+            return 0;
+        if( !strcmp( _rx_buffer, "radio_rx" ) )
+            return 0;
+        if( !strcmp( _rx_buffer, "accepted" ) )
+            return 0;
+        if( !strcmp( _rx_buffer, "denied" ) )
+            return 18;
+        return 0;
 }
 
 static void _lora_write
@@ -208,7 +216,7 @@ static void _lora_read
     } else if( _rsp_f ) {
 
         lora_hal_cts( true );
-        strcpy( *_rsp_buffer, _rx_buffer );
+        strcpy( _rsp_buffer, _rx_buffer );
         lora_hal_cts( false );
     }
 
@@ -284,7 +292,7 @@ void lora_cmd
         strcat( _tx_buffer, args );
     }
 
-    _rsp_buffer = &response;
+    _rsp_buffer = response;
     _lora_write();
 
     while( !_lora_rdy_f )
@@ -299,8 +307,8 @@ int lora_mac_tx
         char *response
 )
 {
-    int res 	  = 0;
-	char tmp[ 5 ] = { 0 };
+    int res           = 0;
+        char tmp[ 5 ] = { 0 };
 
     while( !_lora_rdy_f )
         lora_process();
@@ -311,7 +319,7 @@ int lora_mac_tx
     strcat( _tx_buffer, Ltrim( tmp ) );
     strcat( _tx_buffer, " " );
     strcat( _tx_buffer, buffer );
-    _rsp_buffer = &response;
+    _rsp_buffer = response;
     _lora_write();
 
     while( !_lora_rdy_f )
@@ -324,8 +332,8 @@ int lora_mac_tx
 
     do {
 
-    	while( !_lora_rdy_f )
-    		lora_process();
+            while( !_lora_rdy_f )
+                    lora_process();
 
     } while( ( res = _lora_repar() ) == 12 );
 
@@ -338,14 +346,14 @@ int lora_join
         char *response
 )
 {
-	int res 	  = 0;
+        int res           = 0;
 
     while( !_lora_rdy_f )
         lora_process();
 
     _strcpy_const( _tx_buffer, ( char* )LORA_JOIN );
     _strcat_const( _tx_buffer, _join_mode[ join_mode ] );
-    _rsp_buffer = &response;
+    _rsp_buffer = response;
     _lora_write();
 
     while( !_lora_rdy_f )
@@ -368,8 +376,8 @@ int lora_rx
         char *response
 )
 {
-	int res 	  = 0;
-	char tmp[ 7 ] = { 0 };
+        int res           = 0;
+        char tmp[ 7 ] = { 0 };
 
     while( !_lora_rdy_f )
         lora_process();
@@ -377,7 +385,7 @@ int lora_rx
     _strcpy_const( _tx_buffer, ( char* )LORA_RADIO_RX );
     IntToStr( window_size, tmp );
     strcat( _tx_buffer, Ltrim( tmp ) );
-    _rsp_buffer = &response;
+    _rsp_buffer = response;
     _lora_write();
 
     while( !_lora_rdy_f )
@@ -394,12 +402,9 @@ int lora_rx
     return _lora_repar();
 }
 
-int lora_tx
-(
-        char *buffer
-)
+int lora_tx( char *buffer )
 {
-	int res 	  = 0;
+    int res = 0;
 
     while( !_lora_rdy_f )
         lora_process();
@@ -407,7 +412,7 @@ int lora_tx
     _strcpy_const( _tx_buffer, ( char* )LORA_RADIO_TX );
     strcat( _tx_buffer, buffer );
 
-    _rsp_buffer = &buffer;
+    //_rsp_buffer = buffer;
     _lora_write();
 
     while( !_lora_rdy_f )
@@ -424,10 +429,7 @@ int lora_tx
     return _lora_repar();
 }
 
-void lora_rx_isr
-( 
-	char rx_input 
-)
+void lora_rx_isr( char rx_input )
 {
     static bool _rx_sentence_f;
 
@@ -450,20 +452,14 @@ void lora_rx_isr
     }
 }
 
-void lora_tick_isr
-(
-	void
-)
+void lora_tick_isr()
 {
     if( _timer_use_f )
         if( _timer_f && ( _ticker++ > _timer_max ) )
             _timeout_f = true;
 }
 
-void lora_tick_conf
-( 
-	uint32_t timer_limit 
-)
+void lora_tick_conf( uint32_t timer_limit )
 {
     if ( timer_limit )
     {
@@ -476,5 +472,4 @@ void lora_tick_conf
         _timer_use_f = false;
     }
 }
-
 /*************** END OF FUNCTIONS *********************************************/
