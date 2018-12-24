@@ -1,4 +1,0 @@
-_DEBUG_
-
-LOG_CH(x)       = UART5_Write(x)
-LOG(x)          = UART5_Write_Text(x)

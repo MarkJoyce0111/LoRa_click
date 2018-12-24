@@ -1,0 +1,103 @@
+{*
+Example for LoRa Click
+
+    Date          : Feb 2018.
+    Author        : MikroE Team
+
+Test configuration MSP :
+    
+    MCU              : MSP432
+    Dev. Board       : Clicker 2 for MSP432
+    ARM Compiler ver : v6.0.0.0
+
+---
+Description :
+
+The application is composed of three sections :
+
+- System Initialization - Initializes UART module and CS pin, RST pin as output and INT pin as input
+- Application Initialization - Initializes driver init and LoRa init
+- Application Task - (code snippet) - The transceiver sends one by one byte in UART which is for the work of the lora,
+the Receiver mode, receives one byte and logs it on usbuart. Receiver mode is default mode.
+
+*}
+program Click_LoRa_MSP;
+
+uses Click_LoRa_types, Click_LoRa_config;
+
+var
+    sendMessage : array[8] of uint8_t; 
+    tmp_txt : array[50] of char;
+    sendHex : array[50] of char;
+    rspTxt : array[50] of char; 
+    rsp_data : array[10] of char; 
+    cnt : uint8_t; 
+    send_data : uint8_t; 
+    _data : uint8_t; 
+    rxState : uint8_t; 
+    txState : uint8_t; 
+    
+procedure systemInit(); 
+begin
+
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_INT_PIN, _GPIO_INPUT); 
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_RST_PIN, _GPIO_OUTPUT); 
+    mikrobus_gpioInit(_MIKROBUS1, _MIKROBUS_CS_PIN, _GPIO_OUTPUT); 
+    mikrobus_uartInit(_MIKROBUS1, @_LORA_UART_CFG[0]); 
+    mikrobus_logInit(_MIKROBUS2, 57600); 
+    mikrobus_logWrite('--- System init ---', _LOG_LINE); 
+
+end;
+
+procedure lora_cbk(response : ^uint8_t);
+begin
+
+
+end;
+
+procedure applicationInit(); 
+begin
+
+    lora_uartDriverInit(T_LORA_P(@_MIKROBUS1_GPIO), T_LORA_P(@_MIKROBUS1_UART)); 
+    lora_init(0, @lora_cbk);
+    lora_cmd(@LORA_CMD_SYS_GET_VER[0], @tmp_txt[0]); 
+    lora_cmd(@LORA_CMD_MAC_PAUSE[0], @tmp_txt[0]); 
+    mikrobus_logWrite('mac pause', _LOG_LINE);
+    mikrobus_logWrite(tmp_txt, _LOG_LINE);
+    
+    lora_cmd(@LORA_CMD_RADIO_SET_WDT[0], @tmp_txt[0]); 
+    mikrobus_logWrite('radio set wdt 0', _LOG_LINE); 
+    mikrobus_logWrite(tmp_txt, _LOG_LINE);
+
+end;
+
+procedure applicationTask(); 
+begin
+
+    lora_process(); 
+    rxState := lora_rx(@LORA_ARG_0[0], @tmp_txt[0]); 
+    if ((rxState = 0)) then 
+    begin
+        mikrobus_logWrite(tmp_txt, _LOG_LINE);
+    end; 
+
+end;
+
+begin
+    sendMessage[0] := 'A';
+    sendMessage[1] := 'B';
+    sendMessage[2] := 'C';
+    sendMessage[3] := 'D';
+    sendMessage[4] := 'E';
+    sendMessage[5] := 'F';
+    sendMessage[6] := ' ';
+    sendMessage[7] := 0;
+
+    systemInit(); 
+    applicationInit(); 
+    while (1) do 
+    begin 
+        applicationTask(); 
+    end;
+
+end.
